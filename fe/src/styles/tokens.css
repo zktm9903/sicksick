@@ -1,0 +1,68 @@
+/**
+ * 씩씩이 디자인 토큰.
+ * 프로토타입(sicksick.html)의 window.TOKENS 를 CSS 변수로 옮긴 것.
+ * 색/그림자/라운드 값은 여기서만 정의하고, 컴포넌트는 var() 로만 참조한다.
+ */
+:root {
+  /* surface */
+  --color-bg-page: #f4f8f3;
+  /* 데스크톱에서 앱 컬럼 바깥을 채우는 배경 */
+  --color-bg-surround: #edf1ea;
+  --color-bg-soft: #eaf1e6;
+  --color-card: #ffffff;
+
+  /* brand green */
+  --color-green-50: #f2f8ef;
+  --color-green-100: #e8f3ec;
+  --color-green-200: #cfe5d6;
+  --color-green-300: #a9d2b6;
+  --color-green-400: #8fc9a6;
+  --color-green-500: #5bad7f;
+  --color-green-600: #4a9770;
+  --color-green-700: #2e6b4a;
+  --color-green-800: #1f4a33;
+
+  /* text */
+  --color-ink-1: #1a2420;
+  --color-ink-2: #3f4a44;
+  --color-ink-3: #6e7a74;
+  --color-ink-4: #9aa49f;
+
+  /* border */
+  --color-line: #e7ece8;
+
+  /* semantic */
+  --color-good: #5bad7f;
+  --color-okay: #e3c76a;
+  --color-bad: #d98868;
+  --color-warn: #d98868;
+  --color-info: #7fa8c9;
+
+  /* notice (계정 없음 안내 등) */
+  --color-notice-bg: #fbf3ec;
+  --color-notice-line: #f2dfc9;
+  --color-notice-ink: #8a5a2a;
+
+  /* elevation */
+  --shadow-sm: 0 1px 2px rgba(30, 50, 40, 0.04), 0 2px 8px rgba(30, 50, 40, 0.04);
+  --shadow-md: 0 2px 6px rgba(30, 50, 40, 0.05), 0 8px 24px rgba(30, 50, 40, 0.06);
+  --shadow-lg: 0 4px 12px rgba(30, 50, 40, 0.07), 0 20px 40px rgba(30, 50, 40, 0.08);
+  --shadow-cta: 0 2px 8px rgba(91, 173, 127, 0.25);
+
+  /* radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* typography */
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, 'Apple SD Gothic Neo', sans-serif;
+
+  /* layout — 모바일 화면 기준 치수 */
+  --app-max-width: 480px;
+  --field-height: 52px;
+  --cta-height: 56px;
+  --screen-padding: 20px;
+}

@@ -1,0 +1,64 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: var(--radius-pill);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.button:disabled {
+  cursor: default;
+}
+
+/* size */
+.md {
+  height: 46px;
+  font-size: 14px;
+}
+
+.lg {
+  height: var(--cta-height);
+}
+
+/* variant: primary — 초록 CTA */
+.primary {
+  background: var(--color-green-500);
+  color: #fff;
+  box-shadow: var(--shadow-cta);
+}
+
+.primary:disabled {
+  background: var(--color-line);
+  color: var(--color-ink-4);
+  box-shadow: none;
+}
+
+/* variant: outline */
+.outline {
+  border: 1.5px solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink-3);
+}
+
+/* variant: text — 밑줄 텍스트 버튼.
+   버튼은 width:auto 일 때 내용 크기로 줄어드는데, 기본값인 display:flex 는
+   블록 레벨이라 부모의 text-align 으로 정렬되지 않는다. 텍스트처럼 흐르도록
+   인라인 레벨로 만들어 부모의 정렬을 따르게 한다. */
+.text {
+  display: inline-flex;
+  width: auto;
+  height: auto;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-green-700);
+  text-decoration: underline;
+}

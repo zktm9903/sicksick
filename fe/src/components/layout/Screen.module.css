@@ -1,0 +1,25 @@
+/* 한 화면의 세로 레이아웃: (헤더) — 스크롤 본문 — 고정 하단 CTA */
+.screen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--color-bg-page);
+}
+
+/* 페이지가 --screen-body-padding 을 덮어써서 여백만 바꿀 수 있다.
+   (같은 명시도의 클래스끼리 padding 을 다투지 않도록 변수로 뺐다) */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--screen-body-padding, 20px var(--screen-padding) 0);
+}
+
+/* 홈 인디케이터가 있는 기기에서 CTA 가 가려지지 않도록 safe-area 만큼 더 띄운다. */
+.footer {
+  flex-shrink: 0;
+  padding: var(--screen-footer-padding-top, 14px) var(--screen-padding)
+    calc(var(--screen-footer-padding-bottom, 28px) + env(safe-area-inset-bottom, 0px));
+}

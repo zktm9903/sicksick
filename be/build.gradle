@@ -18,16 +18,14 @@ repositories {
     mavenCentral()
 }
 
+// DB 를 아직 쓰지 않으므로 data-jpa / flyway / docker-compose 는 제외한다.
+// (데이터소스 설정 없이 클래스패스에만 올라가 있으면 기동 시 DataSource 구성 실패로 죽는다)
+// DB 작업을 시작할 때 compose.yaml 의 서비스 정의와 함께 되살릴 것.
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testCompileOnly 'org.projectlombok:lombok'

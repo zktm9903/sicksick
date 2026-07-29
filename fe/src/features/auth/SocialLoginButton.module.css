@@ -1,0 +1,28 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--field-height);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button[data-provider='kakao'] {
+  background: #fee500;
+  color: #191600;
+}
+
+.button[data-provider='naver'] {
+  background: #03c75a;
+  color: #fff;
+}
+
+.button[data-provider='google'] {
+  border: 1.5px solid var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink-1);
+}
