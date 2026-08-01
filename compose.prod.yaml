@@ -1,0 +1,37 @@
+# 서버(OCI 인스턴스) 배포용 구성.
+#
+# 로컬/CI 에서 빌드해 Docker Hub 에 올린 이미지를 그대로 받아 쓴다.
+# 954MB 인스턴스에서 직접 빌드하면 npm 빌드와 Gradle 빌드가 겹쳐 OOM 나므로
+# 서버에서는 절대 build 하지 않는다.
+#
+#   서버:  sudo docker compose -f compose.prod.yaml pull
+#          sudo docker compose -f compose.prod.yaml up -d
+#
+# 이미지는 linux/amd64 여야 한다. 인스턴스가 x86_64(VM.Standard.E2.1.Micro)이므로
+# 애플 실리콘에서 그냥 빌드한 arm64 이미지는 exec format error 로 죽는다.
+#
+# TLS: Cloudflare SSL/TLS 모드가 Full (strict) 이므로 Cloudflare 는 클라이언트가
+# http 로 왔든 https 로 왔든 항상 오리진의 443 에 HTTPS 로 붙는다. 따라서 오리진은
+# 443 만 열면 되고 80 은 열 필요가 없다.
+# 인증서는 Cloudflare Origin CA 발급분(15년)이며 Cloudflare↔오리진 구간에서만
+# 유효하다. 브라우저가 직접 검증하는 인증서가 아니다.
+
+services:
+  app:
+    image: leesang2/sicksick:latest
+    platform: linux/amd64
+    ports:
+      - '443:8443'
+    volumes:
+      # 호스트의 인증서를 읽기 전용으로 마운트한다.
+      - /etc/sicksick/certs:/certs:ro
+    environment:
+      # 1GB 램 인스턴스 기준. 지정하지 않으면 JVM 이 기본 힙을 크게 잡아 OOM 으로 죽는다.
+      JAVA_TOOL_OPTIONS: -Xmx512m -XX:MaxMetaspaceSize=128m
+
+      # Spring Boot SSL Bundle 로 PEM 을 직접 읽는다 (PKCS12 변환 불필요).
+      SERVER_PORT: '8443'
+      SERVER_SSL_BUNDLE: origin
+      SPRING_SSL_BUNDLE_PEM_ORIGIN_KEYSTORE_CERTIFICATE: file:/certs/origin.pem
+      SPRING_SSL_BUNDLE_PEM_ORIGIN_KEYSTORE_PRIVATE_KEY: file:/certs/origin.key
+    restart: unless-stopped

@@ -1,0 +1,19 @@
+# 빌드 컨텍스트가 레포 루트이므로 무거운 것들을 반드시 제외한다.
+.git
+.gitignore
+
+# 프로토타입 원본 (512KB, 번들된 아티팩트)
+sicksick.html
+
+# FE
+fe/node_modules
+fe/dist
+
+# BE
+be/build
+be/.gradle
+be/compose.yaml
+
+# 기타
+**/*.log
+.DS_Store
