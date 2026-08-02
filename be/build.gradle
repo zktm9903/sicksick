@@ -18,16 +18,32 @@ repositories {
     mavenCentral()
 }
 
-// DB 를 아직 쓰지 않으므로 data-jpa / flyway / docker-compose 는 제외한다.
-// (데이터소스 설정 없이 클래스패스에만 올라가 있으면 기동 시 DataSource 구성 실패로 죽는다)
-// DB 작업을 시작할 때 compose.yaml 의 서비스 정의와 함께 되살릴 것.
+// spring-boot-docker-compose 는 넣지 않는다.
+// 운영 이미지에는 compose 파일이 없는데도 기동할 때마다 찾으러 다녀 부팅이 느려진다.
+// 로컬 DB 는 `docker compose up -d db` 로 직접 띄운다.
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    // Boot 4 는 기술별 자동설정을 별도 모듈로 쪼갰다. flyway-core 만 넣으면 라이브러리는
+    // 올라오지만 마이그레이션이 자동 실행되지 않는다(스키마가 비어 있는 채로 기동한다).
+    implementation 'org.springframework.boot:spring-boot-flyway'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-security-test'
+    // 스키마가 MySQL 전용(ENGINE=InnoDB, DATETIME(6))이라 H2 로 대체하면 검증이 거짓이 된다.
+    // 마이그레이션·레포지토리 테스트는 실제 MySQL 컨테이너에 붙인다.
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'

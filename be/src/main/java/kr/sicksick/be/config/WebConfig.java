@@ -1,12 +1,14 @@
 package kr.sicksick.be.config;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
@@ -25,6 +27,18 @@ class WebConfig implements WebMvcConfigurer {
 
     private static final String STATIC_LOCATION = "classpath:/static/";
     private static final String INDEX_HTML = "static/index.html";
+
+    private final HandlerMethodArgumentResolver currentUserArgumentResolver;
+
+    WebConfig(HandlerMethodArgumentResolver currentUserArgumentResolver) {
+        this.currentUserArgumentResolver = currentUserArgumentResolver;
+    }
+
+    /** {@code @CurrentUser User} 파라미터를 실제 엔티티로 바꿔주는 리졸버를 등록한다. */
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(currentUserArgumentResolver);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

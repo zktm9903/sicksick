@@ -10,28 +10,64 @@
 # 이미지는 linux/amd64 여야 한다. 인스턴스가 x86_64(VM.Standard.E2.1.Micro)이므로
 # 애플 실리콘에서 그냥 빌드한 arm64 이미지는 exec format error 로 죽는다.
 #
-# TLS: Cloudflare SSL/TLS 모드가 Full (strict) 이므로 Cloudflare 는 클라이언트가
-# http 로 왔든 https 로 왔든 항상 오리진의 443 에 HTTPS 로 붙는다. 따라서 오리진은
-# 443 만 열면 되고 80 은 열 필요가 없다.
-# 인증서는 Cloudflare Origin CA 발급분(15년)이며 Cloudflare↔오리진 구간에서만
-# 유효하다. 브라우저가 직접 검증하는 인증서가 아니다.
+# TLS: 오리진은 HTTP 로만 받는다. 브라우저↔Cloudflare 구간은 Cloudflare 인증서로
+# HTTPS 이지만, Cloudflare↔오리진 구간은 평문이다.
+#
+#   ⚠ Cloudflare SSL/TLS 모드를 반드시 'Flexible' 로 두어야 한다.
+#     'Full' 이나 'Full (strict)' 이면 Cloudflare 가 오리진의 443 에 HTTPS 로 붙으려다
+#     실패해 502 를 돌려준다.
+#
+#   ⚠ 이 구간에는 세션 쿠키와 액세스 토큰이 평문으로 흐른다. 나중에 Cloudflare
+#     Origin CA 인증서(무료·15년)를 발급해 Full (strict) 로 올리는 것을 권한다.
+#     그때는 SERVER_PORT 를 8443 으로 바꾸고 SSL 번들 환경변수와 인증서 볼륨을
+#     되살리면 된다.
+#
+# DB: 운영은 Oracle HeatWave(관리형)를 쓰므로 여기에 db 서비스가 없다.
+# 접속 정보만 환경변수로 넘긴다. HeatWave 는 암호화 연결을 요구하므로 DB_URL 에
+# sslMode=REQUIRED 가 반드시 들어가야 한다. HeatWave 는 퍼블릭 IP 없이 VCN 내부에만
+# 두고, 보안 목록에서 앱 서브넷 → 3306 인그레스를 연다.
+#
+# 비밀값(DB_PASSWORD, JWT_SECRET)은 이 파일에 적지 않는다.
+# 서버의 .env 파일(권한 600) 또는 OCI Vault 에서 주입한다.
+#   서버:  sudo docker compose -f compose.prod.yaml --env-file /etc/sicksick/.env up -d
 
 services:
   app:
     image: leesang2/sicksick:latest
     platform: linux/amd64
     ports:
-      - '443:8443'
-    volumes:
-      # 호스트의 인증서를 읽기 전용으로 마운트한다.
-      - /etc/sicksick/certs:/certs:ro
+      # Cloudflare(Flexible)가 오리진의 80 으로 붙는다.
+      # 80:8080 이라 JVM 이 특권 포트를 직접 바인딩할 필요가 없다.
+      - '80:8080'
     environment:
       # 1GB 램 인스턴스 기준. 지정하지 않으면 JVM 이 기본 힙을 크게 잡아 OOM 으로 죽는다.
       JAVA_TOOL_OPTIONS: -Xmx512m -XX:MaxMetaspaceSize=128m
 
-      # Spring Boot SSL Bundle 로 PEM 을 직접 읽는다 (PKCS12 변환 불필요).
-      SERVER_PORT: '8443'
-      SERVER_SSL_BUNDLE: origin
-      SPRING_SSL_BUNDLE_PEM_ORIGIN_KEYSTORE_CERTIFICATE: file:/certs/origin.pem
-      SPRING_SSL_BUNDLE_PEM_ORIGIN_KEYSTORE_PRIVATE_KEY: file:/certs/origin.key
+      # 운영 전용 안전장치(OAuthStubGuard)를 켠다. 이게 없으면 개발용 스텁이 켜진 채로
+      # 배포돼도 아무도 막지 못한다 — 스텁은 인증 없이 임의 계정으로 로그인시켜 준다.
+      SPRING_PROFILES_ACTIVE: prod
+
+      # HTTP 로만 받는다. SSL 번들 환경변수는 값을 비우는 것으로는 끌 수 없고
+      # (빈 값이어도 SSL 이 켜진 것으로 판단해 기동에 실패한다) 아예 없어야 한다.
+      SERVER_PORT: '8080'
+
+      # HeatWave 접속. DB_URL 예시:
+      #   jdbc:mysql://10.0.1.x:3306/sicksick?sslMode=REQUIRED
+      DB_URL: ${DB_URL:?DB_URL required}
+      DB_USER: ${DB_USER:?DB_USER required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+
+      # 32바이트 이상. 이 값이 바뀌면 발급된 액세스 토큰이 전부 무효가 된다.
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
+      # 오리진은 HTTP 지만 브라우저는 Cloudflare 를 통해 HTTPS 로 접속하므로
+      # Secure 쿠키가 정상 동작한다. 오리진 IP 로 직접(HTTP) 들어오면 쿠키가
+      # 심기지 않는데, 그게 의도한 동작이다.
+      COOKIE_SECURE: 'true'
+      # 개발용 스텁 프로바이더는 운영에서 절대 켜지 않는다(켜면 기동이 실패한다).
+      OAUTH_STUB: 'false'
+      OAUTH_BASE_URL: ${OAUTH_BASE_URL:?OAUTH_BASE_URL required}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID:-}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
     restart: unless-stopped

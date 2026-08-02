@@ -1,0 +1,31 @@
+.body {
+  --screen-body-padding: 0 28px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.title {
+  margin: 20px 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-ink-1);
+}
+
+.description {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--color-ink-3);
+}
+
+.footer {
+  --screen-footer-padding-bottom: 32px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

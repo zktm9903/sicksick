@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 
 import { ROUTES } from '@/app/routes'
 import { Mascot } from '@/components/brand/Mascot'
@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/Button'
 import { Divider } from '@/components/ui/Divider'
 import { TextField } from '@/components/ui/TextField'
 import { SocialLoginButton } from '@/features/auth/SocialLoginButton'
+import { LOGIN_ERROR_PARAM, loginErrorMessage } from '@/features/auth/loginErrors'
 import { SOCIAL_PROVIDERS, type SocialProvider } from '@/features/auth/socialProviders'
 import { useTestProbe } from '@/features/test/useTestProbe'
+import { alertMessage } from '@/lib/alertError'
 
 import styles from './LoginPage.module.css'
 
@@ -17,11 +19,24 @@ export function LoginPage() {
   useTestProbe()
 
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [notFound, setNotFound] = useState(false)
 
   const canSubmit = email.trim().length > 0 && password.length > 0
+
+  // 소셜 로그인 실패나 세션 만료로 되돌아온 경우. 서버가 붙인 코드를 안내로 바꿔 띄운다.
+  const errorCode = searchParams.get(LOGIN_ERROR_PARAM)
+
+  useEffect(() => {
+    if (!errorCode) {
+      return
+    }
+    alertMessage(loginErrorMessage(errorCode))
+    // 쿼리를 즉시 지운다. 남겨두면 새로고침이나 뒤로 가기 때마다 같은 안내가 다시 뜬다.
+    navigate(ROUTES.login, { replace: true })
+  }, [errorCode, navigate])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -29,9 +44,16 @@ export function LoginPage() {
     setNotFound(true)
   }
 
-  // 간편 로그인 — 매칭되는 계정이 없으면 소셜 계정 정보로 바로 약관 동의부터 진행한다.
+  // 간편 로그인 — 서버가 각 사 인가 화면으로 302 시킨다.
+  //
+  // fetch 가 아니라 페이지 이동이어야 한다. fetch 로 부르면 브라우저가 302 를 따라가면서
+  // 카카오·네이버 도메인에 CORS 요청을 보내 실패한다.
   const handleSocialLogin = (provider: SocialProvider) => {
-    navigate(ROUTES.signup.terms, { state: { provider: provider.id } })
+    if (!provider.enabled) {
+      alertMessage(`${provider.name} 로그인은 준비 중이에요.`)
+      return
+    }
+    window.location.href = `/api/v1/auth/oauth/${provider.id}/authorize`
   }
 
   const goToSignup = () => navigate(ROUTES.signup.account)

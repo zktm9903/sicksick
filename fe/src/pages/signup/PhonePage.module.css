@@ -1,0 +1,75 @@
+.body {
+  --screen-body-padding: 20px var(--screen-padding) 0;
+}
+
+.title {
+  margin: 6px 0 22px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  color: var(--color-ink-1);
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink-2);
+}
+
+/* 인증번호 입력칸 안쪽에 겹쳐 놓는 재요청 버튼. */
+.codeWrap {
+  position: relative;
+}
+
+.resend {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  height: var(--field-height);
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-ink-3);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 2px 0;
+}
+
+.countdown {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-green-700);
+}
+
+.countdownExpired {
+  color: var(--color-bad);
+}
+
+.hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+}
+
+/* 개발 환경에서만 노출되는 목업 인증번호 안내. */
+.devCode {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-notice-line);
+  border-radius: var(--radius-md);
+  background: var(--color-notice-bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-notice-ink);
+}

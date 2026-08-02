@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes } from 'react'
+import { useId, type InputHTMLAttributes, type Ref } from 'react'
 
 import { cx } from '@/lib/cx'
 
@@ -8,6 +8,8 @@ type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   error?: string
   className?: string
+  /** React 19 부터 함수 컴포넌트도 ref 를 일반 prop 으로 받는다(forwardRef 불필요). */
+  ref?: Ref<HTMLInputElement>
 }
 
 export function TextField({ label, error, className, id, ...props }: TextFieldProps) {

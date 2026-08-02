@@ -1,0 +1,28 @@
+/* 프로토타입 VerifyBanner — 입력이 유효해졌을 때 뜨는 초록 확인 배너. */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-green-50);
+}
+
+.icon {
+  display: flex;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-green-500);
+  color: var(--color-card);
+}
+
+.text {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-green-700);
+}

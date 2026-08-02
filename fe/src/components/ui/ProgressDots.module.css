@@ -1,0 +1,19 @@
+/* 프로토타입 ProgressDots — 균등 너비 막대 4칸. 지나온 단계는 초록으로 채운다. */
+.track {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 0 var(--screen-padding) 4px;
+}
+
+.segment {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--color-line);
+  transition: background 0.2s;
+}
+
+.filled {
+  background: var(--color-green-500);
+}

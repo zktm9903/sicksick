@@ -1,19 +1,38 @@
-# 빌드 컨텍스트가 레포 루트이므로 무거운 것들을 반드시 제외한다.
+# 빌드 컨텍스트가 레포 루트이므로 무거운 것과 비밀값을 반드시 제외한다.
+# 여기 적힌 것은 Docker 데몬으로 전송조차 되지 않는다.
 .git
 .gitignore
 
-# 프로토타입 원본 (512KB, 번들된 아티팩트)
+# 프로토타입 원본 (26MB 자가압축 번들). 빌드에 쓰이지 않는다.
 sicksick.html
 
-# FE
+# ── 비밀값 ──
+# 소셜 앱 키·DB 비밀번호가 들어 있다. 이미지에 COPY 되지 않더라도
+# 컨텍스트로 전송되는 것 자체를 막는다.
+.env
+.env.*
+*.pem
+*.key
+
+# ── FE ──
+# 컨테이너 안에서 npm ci 로 다시 설치하므로 보낼 필요가 없다.
+# 93MB 라 전송 시간과 캐시에 직접 영향을 준다.
 fe/node_modules
 fe/dist
 
-# BE
+# ── BE ──
+# 컨테이너 안에서 gradle 이 다시 빌드한다.
 be/build
 be/.gradle
 be/compose.yaml
 
-# 기타
+# ── 배포·문서 (이미지에 불필요) ──
+compose.yaml
+compose.prod.yaml
+build-push.sh
+
+# ── 기타 ──
 **/*.log
 .DS_Store
+.idea
+.vscode
