@@ -1,0 +1,26 @@
+/* 프로토타입 Chip — 알약 모양 토글 버튼. 증상 선택·진단 상태에 쓴다. */
+.chip {
+  padding: 10px 16px;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-card);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.active {
+  border-color: transparent;
+  background: var(--color-green-500);
+  color: var(--color-card);
+}
+
+/* 목록형 배치에서 폭을 채우는 변형(배타 선택지 등). */
+.block {
+  width: 100%;
+  text-align: left;
+}

@@ -1,8 +1,17 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 
 import { AuthGuard } from '@/features/auth/AuthGuard'
+import { OnboardingLayout } from '@/features/onboarding/OnboardingLayout'
 import { ErrorPage } from '@/pages/ErrorPage'
 import { LoginPage } from '@/pages/login/LoginPage'
+import { BasicInfoPage } from '@/pages/onboarding/BasicInfoPage'
+import { ConditionConfirmPage } from '@/pages/onboarding/ConditionConfirmPage'
+import { ConditionGatePage } from '@/pages/onboarding/ConditionGatePage'
+import { ConditionPage } from '@/pages/onboarding/ConditionPage'
+import { NicknamePage } from '@/pages/onboarding/NicknamePage'
+import { OnboardingDonePage } from '@/pages/onboarding/OnboardingDonePage'
+import { RecentPage } from '@/pages/onboarding/RecentPage'
+import { SymptomsPage } from '@/pages/onboarding/SymptomsPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { DonePage } from '@/pages/signup/DonePage'
 import { OtpPage } from '@/pages/signup/OtpPage'
@@ -63,21 +72,22 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // 온보딩
-      { path: ROUTES.onboarding.nickname, element: <PlaceholderPage title="닉네임 설정" /> },
+      // 온보딩 — 8화면이 입력을 공유하고 마지막에 한 번에 저장한다.
+      // OnboardingLayout 이 그 상태를 들고 있고, 진입 자격도 거기서 검사한다
+      // (AuthGuard 는 nextStep 과 경로가 정확히 같아야 통과시켜 여기 쓸 수 없다).
       {
-        path: ROUTES.onboarding.conditionGate,
-        element: <PlaceholderPage title="질환 등록 여부" />,
+        element: <OnboardingLayout />,
+        children: [
+          { path: ROUTES.onboarding.nickname, element: <NicknamePage /> },
+          { path: ROUTES.onboarding.conditionGate, element: <ConditionGatePage /> },
+          { path: ROUTES.onboarding.condition, element: <ConditionPage /> },
+          { path: ROUTES.onboarding.conditionConfirm, element: <ConditionConfirmPage /> },
+          { path: ROUTES.onboarding.symptoms, element: <SymptomsPage /> },
+          { path: ROUTES.onboarding.recent, element: <RecentPage /> },
+          { path: ROUTES.onboarding.basic, element: <BasicInfoPage /> },
+          { path: ROUTES.onboarding.done, element: <OnboardingDonePage /> },
+        ],
       },
-      { path: ROUTES.onboarding.condition, element: <PlaceholderPage title="질환 검색" /> },
-      {
-        path: ROUTES.onboarding.conditionConfirm,
-        element: <PlaceholderPage title="질환 정보 확인" />,
-      },
-      { path: ROUTES.onboarding.symptoms, element: <PlaceholderPage title="증상 선택" /> },
-      { path: ROUTES.onboarding.recent, element: <PlaceholderPage title="최근 증상 시점" /> },
-      { path: ROUTES.onboarding.basic, element: <PlaceholderPage title="기본 정보" /> },
-      { path: ROUTES.onboarding.done, element: <PlaceholderPage title="등록 완료" /> },
 
       { path: ROUTES.home, element: <PlaceholderPage title="홈" /> },
       { path: '*', element: <PlaceholderPage title="페이지를 찾을 수 없어요" /> },

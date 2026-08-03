@@ -1,0 +1,10 @@
+.greeting {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-green-700);
+}
+
+.birthField {
+  margin-top: 24px;
+}

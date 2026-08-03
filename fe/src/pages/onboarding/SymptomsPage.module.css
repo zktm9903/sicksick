@@ -1,0 +1,31 @@
+.customRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.customInput {
+  flex: 1;
+}
+
+.addButton {
+  width: auto;
+  height: var(--field-height);
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-green-100);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-green-700);
+  cursor: pointer;
+}
+
+/* "경험한 증상이 없어요" 같은 배타 선택지는 세로로 쌓는다. */
+.exclusiveList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}

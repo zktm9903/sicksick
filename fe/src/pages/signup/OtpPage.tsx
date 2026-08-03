@@ -7,6 +7,7 @@ import { AppHeader } from '@/components/layout/AppHeader'
 import { Screen, ScreenBody, ScreenFooter } from '@/components/layout/Screen'
 import { Button } from '@/components/ui/Button'
 import { ProgressDots } from '@/components/ui/ProgressDots'
+import { SIGNUP_STEPS } from '@/features/signup/constants'
 import { TextField } from '@/components/ui/TextField'
 import { VerifyBanner } from '@/components/ui/VerifyBanner'
 import { SESSION_QUERY_KEY } from '@/features/auth/session'
@@ -77,7 +78,7 @@ export function OtpPage() {
   return (
     <Screen>
       <AppHeader title="본인인증" onBack={() => navigate(ROUTES.signup.phone)} />
-      <ProgressDots step="otp" />
+      <ProgressDots steps={SIGNUP_STEPS} step="otp" label="회원가입 진행률" />
 
       <ScreenBody className={styles.body}>
         <h2 className={styles.title}>

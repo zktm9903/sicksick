@@ -1,6 +1,7 @@
 package kr.sicksick.be.auth.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,18 @@ public class User {
 
     @Column(length = 50)
     private String nickname;
+
+    /** 온보딩에서 입력받는다. */
+    private LocalDate birthDate;
+
+    /**
+     * 키·몸무게는 선택 입력이라 null 일 수 있다.
+     *
+     * <p>현재값만 둔다. 체중 변화 추이가 필요해지면 별도 이력 테이블을 만든다.
+     */
+    private Short heightCm;
+
+    private Short weightKg;
 
     @Column(length = 20)
     private String phone;
@@ -83,6 +96,16 @@ public class User {
 
     public void changeNickname(String nickname, Instant now) {
         this.nickname = nickname;
+        this.updatedAt = now;
+    }
+
+    /** 온보딩에서 받은 프로필. 키·몸무게는 건너뛸 수 있어 null 을 허용한다. */
+    public void updateProfile(String nickname, LocalDate birthDate,
+                              Short heightCm, Short weightKg, Instant now) {
+        this.nickname = nickname;
+        this.birthDate = birthDate;
+        this.heightCm = heightCm;
+        this.weightKg = weightKg;
         this.updatedAt = now;
     }
 

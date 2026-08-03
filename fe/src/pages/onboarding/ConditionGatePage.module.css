@@ -1,0 +1,37 @@
+/* "지금 등록 / 나중에" 선택 카드 2개. */
+.option {
+  display: block;
+  width: 100%;
+  padding: 20px 18px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-card);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 권장 선택지는 초록 톤으로 강조한다. */
+.recommended {
+  margin-bottom: 12px;
+  border-color: var(--color-green-200);
+  background: var(--color-green-50);
+}
+
+/* span 은 인라인이라 block 을 주지 않으면 제목과 설명이 한 줄에 붙는다. */
+.optionTitle {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-ink-1);
+}
+
+.optionDescription {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+.recommended .optionDescription {
+  color: var(--color-green-700);
+}

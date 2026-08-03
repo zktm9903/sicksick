@@ -8,6 +8,7 @@ import { Screen, ScreenBody, ScreenFooter } from '@/components/layout/Screen'
 import { Button } from '@/components/ui/Button'
 import { Checkbox, CheckboxChevron, RequirementTag } from '@/components/ui/Checkbox'
 import { ProgressDots } from '@/components/ui/ProgressDots'
+import { SIGNUP_STEPS } from '@/features/signup/constants'
 import { SESSION_QUERY_KEY } from '@/features/auth/session'
 import { agreeTerms, fetchTerms, type Term } from '@/features/signup/api'
 import { alertError } from '@/lib/alertError'
@@ -54,7 +55,7 @@ export function TermsPage() {
   return (
     <Screen>
       <AppHeader title="약관 동의" onBack={() => navigate(ROUTES.login)} />
-      <ProgressDots step="terms" />
+      <ProgressDots steps={SIGNUP_STEPS} step="terms" label="회원가입 진행률" />
 
       <ScreenBody className={styles.body}>
         <h2 className={styles.title}>
