@@ -26,6 +26,10 @@ be/build
 be/.gradle
 be/compose.yaml
 
+# ── 앱 (React Native) ──
+# 서버 이미지와 아무 관계가 없다. 통째로 제외한다.
+app
+
 # ── 배포·문서 (이미지에 불필요) ──
 compose.yaml
 compose.prod.yaml
