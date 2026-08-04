@@ -41,6 +41,12 @@ const config = {
   ios: {
     bundleIdentifier: 'kr.sicksick.app',
     supportsTablet: true,
+    config: {
+      // 앱이 쓰는 암호화는 HTTPS/TLS 뿐이라 미국 수출 규정에서 면제 대상이다.
+      // 미리 밝혀두지 않으면 업로드할 때마다 App Store Connect 가 물어보고,
+      // 답하기 전까지 빌드가 테스터에게 배포되지 않는다.
+      usesNonExemptEncryption: false,
+    },
     infoPlist: {
       // 개발 중 맥의 Vite(HTTP)를 보기 위한 예외. 운영 빌드에는 넣지 않는다.
       // 운영은 Cloudflare 를 통해 HTTPS 로 붙으므로 예외가 필요 없다.
