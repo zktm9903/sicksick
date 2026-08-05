@@ -1,0 +1,21 @@
+.body {
+  --screen-body-padding: 20px var(--screen-padding) 0;
+}
+
+.title {
+  margin: 6px 0 22px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.5px;
+  color: var(--color-ink-1);
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+/* 마지막 칸은 아래 여백이 필요 없다(오류 문구가 붙는 자리다). */
+.field:last-of-type {
+  margin-bottom: 0;
+}

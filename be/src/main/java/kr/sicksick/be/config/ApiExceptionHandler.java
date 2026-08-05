@@ -53,6 +53,18 @@ class ApiExceptionHandler {
         return build(e.getReason(), status);
     }
 
+    /**
+     * 화면이 종류에 따라 다르게 동작해야 하는 오류. 문구와 함께 분기용 코드를 실어 준다.
+     *
+     * <p>스택은 남기지 않는다. 잘못된 비밀번호처럼 <b>정상적으로 자주 일어나는</b> 흐름이라
+     * 스택을 찍으면 로그가 의미 없이 불어난다.
+     */
+    @ExceptionHandler(ApiException.class)
+    ResponseEntity<ApiErrorResponse> handleApiException(ApiException e) {
+        return ResponseEntity.status(e.getStatus())
+                .body(ApiErrorResponse.of(e.getMessage(), e.getStatus().value(), e.getCode()));
+    }
+
     /** {@code @Valid} 검증 실패. 화면에 한 줄로 뜨므로 첫 번째 위반만 보여준다. */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException e) {

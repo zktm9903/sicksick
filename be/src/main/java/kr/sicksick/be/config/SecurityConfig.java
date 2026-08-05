@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -67,6 +69,9 @@ class SecurityConfig {
                         .requestMatchers("/api/v1/auth/oauth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
+                        // 자체 가입·로그인. 아직 토큰이 없는 상태에서 부른다.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         // 약관 본문은 가입 전에도 봐야 한다.
                         .requestMatchers(HttpMethod.GET, "/api/v1/terms").permitAll()
                         .requestMatchers("/api/v1/test/**").permitAll()
@@ -78,6 +83,19 @@ class SecurityConfig {
                         .anyRequest().permitAll());
 
         return http.build();
+    }
+
+    /**
+     * 비밀번호 해시.
+     *
+     * <p>{@code BCryptPasswordEncoder} 를 직접 쓰지 않고 위임 인코더를 쓰는 이유는 저장값에
+     * {@code {bcrypt}} 접두사가 붙기 때문이다. 나중에 더 강한 알고리즘으로 옮길 때 기존
+     * 해시를 그대로 두고도 검증할 수 있다 — 접두사가 없으면 전체 사용자의 비밀번호를
+     * 재설정시키는 것 외에 방법이 없다.
+     */
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     /**

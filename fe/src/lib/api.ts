@@ -4,13 +4,22 @@ export class ApiError extends Error {
   readonly path: string
   /** 서버가 내려준 안내 문구. 없으면 undefined. */
   readonly detail?: string
+  /**
+   * 화면이 오류 종류에 따라 다르게 동작해야 할 때만 채워진다.
+   *
+   * 예: 로그인 실패가 `account_not_found` 면 alert 대신 회원가입 유도 배너를 띄운다.
+   * 문구로 분기하면 서버 문구를 고치는 순간 조용히 깨지므로 코드를 본다.
+   * 서버의 `kr.sicksick.be.config.ApiException` 과 짝을 이룬다.
+   */
+  readonly code?: string
 
-  constructor(status: number, path: string, detail?: string) {
+  constructor(status: number, path: string, detail?: string, code?: string) {
     super(detail ?? `API ${status}: ${path}`)
     this.name = 'ApiError'
     this.status = status
     this.path = path
     this.detail = detail
+    this.code = code
   }
 }
 
@@ -195,7 +204,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, path, await readErrorMessage(response))
+    const { message, code } = await readError(response)
+    throw new ApiError(response.status, path, message, code)
   }
 
   // 204 No Content 는 본문이 없다.
@@ -207,17 +217,19 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 /**
- * 서버가 내려준 안내 문구를 꺼낸다.
+ * 서버가 내려준 안내 문구와 분기 코드를 꺼낸다.
  *
  * `message` 만 본다. 스프링 기본 오류 본문의 `error` 필드에는 `"Bad Request"` 같은
  * 프레임워크 문자열이 들어 있어서, 그걸 fallback 으로 쓰면 그대로 사용자에게 노출된다.
+ *
+ * `code` 는 서버가 필요할 때만 붙인다. 대부분의 오류에는 없다.
  */
-async function readErrorMessage(response: Response): Promise<string | undefined> {
+async function readError(response: Response): Promise<{ message?: string; code?: string }> {
   try {
-    const body = (await response.json()) as { message?: string }
-    return body.message?.trim() || undefined
+    const body = (await response.json()) as { message?: string; code?: string }
+    return { message: body.message?.trim() || undefined, code: body.code || undefined }
   } catch {
-    return undefined
+    return {}
   }
 }
 

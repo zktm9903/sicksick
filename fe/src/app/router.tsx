@@ -1,8 +1,10 @@
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 
 import { AuthGuard } from '@/features/auth/AuthGuard'
+import { SessionRedirect } from '@/features/auth/SessionRedirect'
 import { OnboardingLayout } from '@/features/onboarding/OnboardingLayout'
 import { ErrorPage } from '@/pages/ErrorPage'
+import { HomePage } from '@/pages/home/HomePage'
 import { LoginPage } from '@/pages/login/LoginPage'
 import { BasicInfoPage } from '@/pages/onboarding/BasicInfoPage'
 import { ConditionConfirmPage } from '@/pages/onboarding/ConditionConfirmPage'
@@ -13,6 +15,7 @@ import { OnboardingDonePage } from '@/pages/onboarding/OnboardingDonePage'
 import { RecentPage } from '@/pages/onboarding/RecentPage'
 import { SymptomsPage } from '@/pages/onboarding/SymptomsPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { AccountPage } from '@/pages/signup/AccountPage'
 import { DonePage } from '@/pages/signup/DonePage'
 import { OtpPage } from '@/pages/signup/OtpPage'
 import { PhonePage } from '@/pages/signup/PhonePage'
@@ -31,12 +34,30 @@ export const router = createBrowserRouter([
     // 하위 화면에서 렌더 중 예외가 나면 개발자용 오류 화면 대신 이걸 보여준다.
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Navigate to={ROUTES.login} replace /> },
-      { path: ROUTES.login, element: <LoginPage /> },
+      // 앱(웹뷰)은 항상 루트로 열린다. 여기서 무조건 로그인으로 보내면 리프레시
+      // 쿠키가 살아 있는 사용자도 매번 로그인 화면을 보게 된다.
+      { index: true, element: <SessionRedirect /> },
+      {
+        path: ROUTES.login,
+        element: (
+          <SessionRedirect>
+            <LoginPage />
+          </SessionRedirect>
+        ),
+      },
 
       // 회원가입 — 소셜 인증을 마친(PENDING) 유저만 진입한다.
       // AuthGuard 가 서버의 nextStep 과 경로를 대조해 어긋나면 제자리로 돌려보낸다.
-      { path: ROUTES.signup.account, element: <PlaceholderPage title="계정 만들기" /> },
+      {
+        // 계정이 아직 없는 상태로 들어오는 화면이라 AuthGuard 가 아니다.
+        // 반대로 이미 로그인한 사람은 여기 있을 이유가 없으므로 되돌려 보낸다.
+        path: ROUTES.signup.account,
+        element: (
+          <SessionRedirect>
+            <AccountPage />
+          </SessionRedirect>
+        ),
+      },
       {
         path: ROUTES.signup.terms,
         element: (
@@ -89,7 +110,14 @@ export const router = createBrowserRouter([
         ],
       },
 
-      { path: ROUTES.home, element: <PlaceholderPage title="홈" /> },
+      {
+        path: ROUTES.home,
+        element: (
+          <AuthGuard>
+            <HomePage />
+          </AuthGuard>
+        ),
+      },
       { path: '*', element: <PlaceholderPage title="페이지를 찾을 수 없어요" /> },
     ],
   },

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import { ROUTES } from '@/app/routes'
@@ -8,10 +9,13 @@ import { Button } from '@/components/ui/Button'
 import { Divider } from '@/components/ui/Divider'
 import { TextField } from '@/components/ui/TextField'
 import { SocialLoginButton } from '@/features/auth/SocialLoginButton'
+import { ACCOUNT_NOT_FOUND, loginWithPassword } from '@/features/auth/api'
 import { LOGIN_ERROR_PARAM, loginErrorMessage } from '@/features/auth/loginErrors'
+import { SESSION_QUERY_KEY } from '@/features/auth/session'
 import { SOCIAL_PROVIDERS, type SocialProvider } from '@/features/auth/socialProviders'
 import { useTestProbe } from '@/features/test/useTestProbe'
-import { alertMessage } from '@/lib/alertError'
+import { ApiError } from '@/lib/api'
+import { alertError, alertMessage } from '@/lib/alertError'
 
 import styles from './LoginPage.module.css'
 
@@ -19,6 +23,7 @@ export function LoginPage() {
   useTestProbe()
 
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,10 +43,27 @@ export function LoginPage() {
     navigate(ROUTES.login, { replace: true })
   }, [errorCode, navigate])
 
+  const login = useMutation({
+    mutationFn: () => loginWithPassword(email, password),
+    onSuccess: async (result) => {
+      // 갈 곳은 서버가 정한다. 가입을 마치지 않았으면 중단한 단계로 이어진다.
+      await queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY })
+      navigate(result.nextStep, { replace: true })
+    },
+    onError: (error) => {
+      // 가입된 계정이 없을 때만 화면에 회원가입 유도 배너를 띄운다.
+      // 나머지(비밀번호 오류·소셜 전용 계정 등)는 다른 오류와 같이 alert 로 안내한다.
+      if (error instanceof ApiError && error.code === ACCOUNT_NOT_FOUND) {
+        setNotFound(true)
+        return
+      }
+      alertError(error, '로그인에 실패했어요.')
+    },
+  })
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // TODO: 로그인 API 연동. 현재는 매칭되는 계정이 없는 상황을 가정해 회원가입을 유도한다.
-    setNotFound(true)
+    login.mutate()
   }
 
   // 간편 로그인 — 서버가 각 사 인가 화면으로 302 시킨다.
@@ -96,7 +118,11 @@ export function LoginPage() {
               setNotFound(false)
             }}
           />
-          <Button className={styles.submit} type="submit" disabled={!canSubmit}>
+          <Button
+            className={styles.submit}
+            type="submit"
+            disabled={!canSubmit || login.isPending}
+          >
             로그인
           </Button>
 

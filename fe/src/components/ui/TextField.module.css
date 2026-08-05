@@ -3,6 +3,8 @@
 }
 
 .label {
+  /* label 은 기본이 inline 이라 아래 여백이 먹지 않는다. 입력칸과 붙어버린다. */
+  display: block;
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 700;

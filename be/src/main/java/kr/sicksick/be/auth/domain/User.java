@@ -36,6 +36,14 @@ public class User {
     @Column(length = 255)
     private String email;
 
+    /**
+     * 자체 가입 계정의 비밀번호 해시. 소셜로만 가입한 계정은 null 이다.
+     *
+     * <p>알고리즘 접두사를 포함한다({@code {bcrypt}$2a$10$...}). 원문은 어디에도 남기지 않는다.
+     */
+    @Column(length = 255)
+    private String passwordHash;
+
     @Column(length = 50)
     private String nickname;
 
@@ -79,6 +87,22 @@ public class User {
     /** 소셜 인증 직후 만들어지는, 아직 가입을 마치지 않은 유저. */
     public static User pending(String email, String nickname, Instant now) {
         return new User(email, nickname, UserStatus.PENDING, now);
+    }
+
+    /**
+     * 이메일·비밀번호로 직접 가입한, 아직 가입을 마치지 않은 유저.
+     *
+     * <p>닉네임은 받지 않는다. 소셜 가입과 마찬가지로 온보딩에서 입력받는다.
+     */
+    public static User localPending(String email, String passwordHash, Instant now) {
+        User user = new User(email, null, UserStatus.PENDING, now);
+        user.passwordHash = passwordHash;
+        return user;
+    }
+
+    /** 비밀번호 로그인이 가능한 계정인지. 소셜로만 가입했으면 false. */
+    public boolean hasPassword() {
+        return passwordHash != null;
     }
 
     /** 본인인증 성공 시점에 번호를 확정한다. */
