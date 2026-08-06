@@ -22,15 +22,19 @@ export const WEB_URL: string =
  */
 export const APP_USER_AGENT = 'SicksickApp/1.0'
 
+/** 우리 웹의 로그인 화면. 인증 페이지에서 빠져나올 때 돌아갈 곳이다. */
+export const LOGIN_PATH = '/login'
+
+/** 우리가 서비스하는 도메인. */
+const OUR_HOST_SUFFIXES = ['sicksick.kr']
+
 /**
- * 웹뷰 안에서 열어야 하는 호스트.
+ * 소셜 로그인 도메인.
  *
- * 소셜 로그인은 카카오·네이버 도메인을 거쳐 우리 콜백으로 돌아오는데, 중간에
- * 외부 브라우저로 빠지면 콜백이 심는 쿠키가 웹뷰 저장소에 남지 않아 로그인이
- * 완료되지 않는다. 그래서 인증 도메인은 반드시 웹뷰 안에서 처리한다.
+ * 우리 것은 아니지만 웹뷰 안에서 열어야 한다. 외부 브라우저로 빠지면 콜백이 심는
+ * 쿠키가 웹뷰 저장소에 남지 않아 로그인이 완료되지 않는다.
  */
-const INTERNAL_HOST_SUFFIXES = [
-  'sicksick.kr',
+const AUTH_PROVIDER_HOST_SUFFIXES = [
   // 카카오 로그인
   'kakao.com',
   'kakaocdn.net',
@@ -38,6 +42,9 @@ const INTERNAL_HOST_SUFFIXES = [
   'naver.com',
   'naver.net',
 ]
+
+/** 웹뷰 안에서 열어야 하는 호스트 = 우리 것 + 인증 프로바이더. */
+const INTERNAL_HOST_SUFFIXES = [...OUR_HOST_SUFFIXES, ...AUTH_PROVIDER_HOST_SUFFIXES]
 
 /** 로컬 개발 서버(사설 IP)도 웹뷰 안에서 연다. */
 function isPrivateHost(hostname: string): boolean {
@@ -49,17 +56,60 @@ function isPrivateHost(hostname: string): boolean {
   )
 }
 
-export function isInternalUrl(url: string): boolean {
+function matchesAny(hostname: string, suffixes: string[]): boolean {
+  return suffixes.some((suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`))
+}
+
+const WEB_PROTOCOLS = ['http:', 'https:']
+
+/**
+ * 웹뷰가 스스로 처리하는 스킴.
+ *
+ * <p>여기 없는 비(非) HTTP 스킴은 시스템에 넘긴다. {@code kakaotalk://} 이 대표적인데,
+ * "카카오톡으로 로그인"이 이 스킴으로 앱을 띄운다 — 웹뷰가 붙들면 아무 일도 안 일어난다.
+ */
+const WEBVIEW_SCHEMES = ['about:', 'data:', 'blob:', 'javascript:']
+
+/**
+ * URL 을 (프로토콜, 호스트)로 쪼갠다. 파싱 자체가 실패하면 null.
+ *
+ * <p>{@code new URL('about:blank')} 은 <b>예외를 던지지 않는다</b>(호스트가 빈 문자열인
+ * 정상 URL 이다). 그래서 특수 스킴을 try/catch 로 거르려 하면 걸러지지 않고 "아무
+ * 호스트에도 해당하지 않는 주소"로 취급돼 외부 브라우저로 새어 나간다.
+ */
+function parse(url: string): { protocol: string; hostname: string } | null {
   try {
-    const { hostname } = new URL(url)
-    return (
-      isPrivateHost(hostname) ||
-      INTERNAL_HOST_SUFFIXES.some(
-        (suffix) => hostname === suffix || hostname.endsWith(`.${suffix}`),
-      )
-    )
+    const { protocol, hostname } = new URL(url)
+    return { protocol, hostname }
   } catch {
-    // about:blank, data: 같은 특수 스킴. 웹뷰가 알아서 처리하게 둔다.
+    return null
+  }
+}
+
+export function isInternalUrl(url: string): boolean {
+  const parsed = parse(url)
+  if (parsed === null) {
+    return true // 해석할 수 없는 주소는 웹뷰에 맡긴다.
+  }
+  if (!WEB_PROTOCOLS.includes(parsed.protocol)) {
+    return WEBVIEW_SCHEMES.includes(parsed.protocol)
+  }
+  return isPrivateHost(parsed.hostname) || matchesAny(parsed.hostname, INTERNAL_HOST_SUFFIXES)
+}
+
+/**
+ * 우리 웹 화면인가.
+ *
+ * <p>{@link isInternalUrl} 과 달리 카카오·네이버는 제외한다. 둘 다 웹뷰 안에서 열지만,
+ * 프로바이더 페이지에서는 앱이 뒤로가기 수단을 대신 마련해 줘야 하기 때문이다.
+ * 그 페이지는 우리가 만들지 않아서 나가는 길이 없다.
+ */
+export function isOurSite(url: string): boolean {
+  const parsed = parse(url)
+  if (parsed === null || !WEB_PROTOCOLS.includes(parsed.protocol)) {
+    // about:blank 같은 중간 상태. 화면으로 보이는 페이지는 항상 http(s) 이므로
+    // 우리 것으로 봐서 뒤로가기 바가 한 프레임 깜빡이는 것을 막는다.
     return true
   }
+  return isPrivateHost(parsed.hostname) || matchesAny(parsed.hostname, OUR_HOST_SUFFIXES)
 }
